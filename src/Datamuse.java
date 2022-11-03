@@ -1,29 +1,33 @@
 package com.module.datamuse;
-
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.List;
-
 import com.google.gson.Gson;
+import java.io.IOException;
+import org.json.*;
+import java.util.ArrayList;
+import java.util.Scanner;
 
 public class Datamuse {
 	
 	private String url = "";
-    
+
     /**
      * Starts the first step in the builder process.
-     * 
+     *
      * @return Datamuse
      */
     public Datamuse QueryBuilder() {
     	this.url = "http://api.datamuse.com/words?";
     	return this;
     }
-    
+
     /**
      * Adds the 'ml' (means like) endpoint to the query.
-     * 
+     *
      * @param word The word to query, as a String
      * @return Datamuse
      */
@@ -36,10 +40,10 @@ public class Datamuse {
     	}
     	return this;
     }
-    
+
     /**
      * Adds a max word limit endpoint to the query.
-     * 
+     *
      * @param limit The maximum number of words to be returned, as an int
      * @return Datamuse
      */
@@ -51,16 +55,16 @@ public class Datamuse {
     	}
     	return this;
     }
-    
+
     /**
      * Build the query and retrieve the array of JSON objects the is resulted.
-     * 
+     *
      * @return DatamuseObject[]
      */
     public DatamuseObject[] build() {
     	return parseJson(url);
     }
-    
+
     private static String readUrl(String urlString) throws Exception {
         BufferedReader reader = null;
         try {
@@ -70,7 +74,7 @@ public class Datamuse {
             int read;
             char[] chars = new char[1024];
             while ((read = reader.read(chars)) != -1)
-                buffer.append(chars, 0, read); 
+                buffer.append(chars, 0, read);
 
             return buffer.toString();
         } finally {
@@ -79,11 +83,15 @@ public class Datamuse {
             }
         }
     }
-    
+
     public static class DatamuseObject {
         public String word;
         public int score;
         public List<String> tags;
+    }
+
+    public static int random(int max){
+        return  (int)(Math.random()*max+1);
     }
 
     private DatamuseObject[] parseJson(String url) {
