@@ -28,15 +28,32 @@ public class DataMuseQueryWithParser {
 
     /**
      * Returns a list of similar words to the word/phrase supplied.
+     *
      * @param word A word of phrase.
      * @return A list of similar words.
      */
     public String findSimilar(String word) {
         String s = word.replaceAll(" ", "+");
-        return getJSON("http://api.datamuse.com/words?rd="+s);
+        return getJSON("http://api.datamuse.com/words?rd=" + s);
     }
-    public String rhymesWith (String s, String d) {
+
+    public String rhymesWith(String s, String d) {
         return getJSON("http://api.datamuse.com/words?rel_rhy=" + s + "&md=sp" + "&topics=" + d);
+    }
+    public String rhymesWithforWordl(String s) {
+        return getJSON("https://api.datamuse.com/words?rel_rhy=" + s + "&max=1000");
+    }
+    public String SynonymsforWordl(String s) {
+        return getJSON("http://api.datamuse.com/words?rel_syn=" + s + "&max=1000");
+    }
+    public String soundsSimilarforWordl(String s) {
+        return getJSON("http://api.datamuse.com/words?sl=" + s + "&max=1000");
+    }
+    public String AntonymsforWordl(String s) {
+        return getJSON("http://api.datamuse.com/words?rel_ant=" + s + "&max=1000");
+    }
+    public String rCforWordl(String s){
+            return getJSON("http://api.datamuse.com/words?lc=" + s + "&max=1000");
     }
 
     public String leftContext(String lC) {
@@ -44,8 +61,27 @@ public class DataMuseQueryWithParser {
         //md = metadata, letters indicate what you want returned
     }
 
+    public String leftContextforRobotSentence(String lC) {
+        int randomNum = (int)(Math.random()*5+1);
+        String topic = "";
+        if(randomNum == 1)
+            topic = "robots";
+        else if(randomNum == 2)
+            topic = "arm";
+        else if(randomNum == 3)
+            topic = "brain";
+        else if(randomNum == 4)
+            topic = "machine";
+        else if(randomNum == 5)
+            topic = "cyborg";
+
+        return getJSON("http://api.datamuse.com/words?lc=" + lC + "&md=sp&topics="+topic);
+        //md = metadata, letters indicate what you want returned
+    }
+
     /**
      * Returns adj that modifies word to the right often
+     *
      * @param rC word to the right
      * @return adj modifying rC
      */
@@ -67,31 +103,34 @@ public class DataMuseQueryWithParser {
 
     /**
      * Returns a list of similar words to the word/phrase supplied beginning with the specified letter(s).
-     * @param word A word or phrase.
+     *
+     * @param word        A word or phrase.
      * @param startLetter The letter(s) the similar words should begin with.
      * @return A list of similar words.
      */
     public String findSimilarStartsWith(String word, String startLetter) {
         String s = word.replaceAll(" ", "+");
-        return getJSON("http://api.datamuse.com/words?rd="+s+"&sp="+startLetter+"*");
+        return getJSON("http://api.datamuse.com/words?rd=" + s + "&sp=" + startLetter + "*");
     }
 
     /**
      * Returns a list of similar words to the word/phrase supplied ending with the specified letter(s).
-     * @param word A word or phrase.
+     *
+     * @param word      A word or phrase.
      * @param endLetter The letter(s) the similar words should end with.
      * @return A list of similar words.
      */
     public String findSimilarEndsWith(String word, String endLetter) {
         String s = word.replaceAll(" ", "+");
-        return getJSON("http://api.datamuse.com/words?rd="+s+"&sp=*"+endLetter);
+        return getJSON("http://api.datamuse.com/words?rd=" + s + "&sp=*" + endLetter);
     }
 
     /**
      * Returns a list of words beginning and ending with the specified letters and with the specified number of letters
      * in between.
-     * @param startLetter The letter(s) the similar words should start with.
-     * @param endLetter The letter(s) the similar words should end with.
+     *
+     * @param startLetter   The letter(s) the similar words should start with.
+     * @param endLetter     The letter(s) the similar words should end with.
      * @param numberMissing The number of letters between the start and end letters
      * @return A list of matching words.
      */
@@ -106,8 +145,9 @@ public class DataMuseQueryWithParser {
     /**
      * Returns a list of words beginning and ending with the specified letters and with an unspecified number of letters
      * in between.
+     *
      * @param startLetter The letter(s) the similar words should start with.
-     * @param endLetter The letter(s) the similar words should end with.
+     * @param endLetter   The letter(s) the similar words should end with.
      * @return A list of matching words.
      */
     public String wordsStartingWithEndingWith(String startLetter, String endLetter) {
@@ -116,6 +156,7 @@ public class DataMuseQueryWithParser {
 
     /**
      * Find words which sound the same as the specified word/phrase when spoken.
+     *
      * @param word A word or phrase.
      * @return A list of words/phrases which sound similiar when spoken.
      */
@@ -126,6 +167,7 @@ public class DataMuseQueryWithParser {
 
     /**
      * Find words which are spelt the same as the specified word/phrase.
+     *
      * @param word A word or phrase.
      * @return A list of words/phrases which are spelt similar.
      */
@@ -137,6 +179,7 @@ public class DataMuseQueryWithParser {
     /**
      * Returns suggestions for what the user may be typing based on what they have typed so far. Useful for
      * autocomplete on forms.
+     *
      * @param word The current word or phrase.
      * @return Suggestions of what the user may be typing.
      */
@@ -147,6 +190,7 @@ public class DataMuseQueryWithParser {
 
     /**
      * Query a URL for their source code.
+     *
      * @param url The page's URL.
      * @return The source code.
      */

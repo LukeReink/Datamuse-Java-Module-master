@@ -7,6 +7,8 @@ import java.util.Arrays;
 import java.util.List;
 import com.google.gson.Gson;
 import java.io.IOException;
+
+import com.json.utils.JSONUtility;
 import org.json.*;
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -14,56 +16,51 @@ import java.util.Scanner;
 public class Datamuse {
 
 
+    static JSONParse parser = new JSONParse();
+    static DataMuseQueryWithParser data = new DataMuseQueryWithParser();
+    static Scanner s = new Scanner(System.in);
+    static boolean goAgain = true;
+
+    /**
+     * brought in from google; changes color of output text
+     */
+    // Declaring the color
+    // Custom declaration
+    // Declaring ANSI_RESET so that we can reset the color
+    public static final String ANSI_RESET = "\u001B[0m";
+    public static final String ANSI_BLACK = "\u001B[30m";
+    public static final String ANSI_RED = "\033[0;91m";
+    public static final String ANSI_ORANGE = "\033[0m";
+    public static final String YELLOW_BRIGHT = "\033[0;93m"; // YELLOW
+    public static final String ANSI_GREEN = "\033[0;92m";
+    public static final String ANSI_YELLOW = "\u001B[33m";
+    public static final String ANSI_BLUE = "\u001B[34m";
+    public static final String ANSI_PURPLE = "\u001B[35m";
+    public static final String ANSI_BRITEPURPLE = "\033[0;95m";
+    public static final String ANSI_CYAN = "\u001B[36m";
+    public static final String ANSI_WHITE = "\u001B[37m";
+
     public static void main(String[] args) throws JSONException {
         Scanner s = new Scanner(System.in);
-        JSONParse parser = new JSONParse();
-        DataMuseQueryWithParser data = new DataMuseQueryWithParser();
-        System.out.println("Give us a noun");
-        String noun = s.nextLine();
-        System.out.println("Give us another noun");
-        String noun1 = s.nextLine();
-        String adj = parser.parseWords(data.rcAdj(noun))[random(parser.parseWords(data.rcAdj(noun)).length)];
-        String verb = getRandom(parser.parsePartsofSpeech(data.wordsRelatedtoinput(noun),"v",true));
-        System.out.println("At night, the " + adj + " " + noun + " is " + verb);
-        String adj1 = parser.parseWords(data.rcAdj(noun1))[random(parser.parseWords(data.rcAdj(noun1)).length)];
-        String verb1 = getRandom(parser.parsePartsofSpeech(data.rhymesWith(verb,noun1),"v",true));
-        System.out.println("Yet at day the " + adj1 + " " + noun1 + " is " + verb1);
-//        ArrayList<String> PoS = parser.parsePartsofSpeech(data.leftContext(noun),"n",true);
-//        System.out.println("POS: " + PoS);
 
-       // String adj2 = parser.parseWords(data.rcAdj(noun))[2];
-//        System.out.println("The " + adj + " " + noun + " is " + adj1);
-//        System.out.println("The " + adj1 + " " + noun + " is " + PoS.get(randomIndex(PoS)));
-//        System.out.println("The " + adj + " " + noun + " is " + parser.parseWords(data.lcVerbs(noun))[0]);
-
-
-
-
-//        String verb =
-//                System.out.println("The " + adj + " " + noun + " is " + parser.parseWords(data.lcVerbs(pNoun))[0]);
-
-
-//        DataMuseQueryWithParser dMuse = new DataMuseQueryWithParser();
-//        JSONParse parse = new JSONParse();
-//        System.out.println(dMuse.leftContext("when"));
-//        printIntList(parse.parseSyllables(dMuse.leftContext("when")));
-        //how do I get the individual parts of speech so that I can compare them (should I rewrite the .equals method in the object class)
-
-
-//        String[] leftContexts = (getLC("do"));
-//        System.out.println("When ");
-//        String finalWord = "";
-//        String lastWord = "";
-//        String oWord = "smile";
-//        lastWord = getLC(oWord)[0];
-//        finalWord = oWord + " " + lastWord;
-//        for (int i = 0; i < 8; i++) {
-//            finalWord = finalWord + " " + getLC(lastWord)[0];
-//            lastWord = getLC(lastWord)[0];
-//            System.out.println(finalWord);
-//        }
-
-
+        System.out.println("Welcome to our system! You will participate in 4 activities. First: Haiku generator! Ready? (press enter)");
+        s.nextLine();
+        haiku();
+        System.out.println();
+        System.out.println("Next: Alliteration Alternator! Ready? (press enter)");
+        s.nextLine();
+        alliterationGenerator();
+        System.out.println();
+        System.out.println("Next: Wicked Wordl! Ready? (you know what to do)");
+        s.nextLine();
+        wordl();
+        System.out.println();
+        System.out.println("Finally: Robot Sentence! Ready? (you guessed it, press E to the NTE to the R)");
+        s.nextLine();
+        robotSentence();
+        System.out.println();
+        System.out.println("WOW! That was a movie. Thanks for playing.");
+        rainbowWrite("Cya!", true);
     }
 
     private static String[] getLC(String word) {
@@ -72,7 +69,6 @@ public class Datamuse {
         String[] returned = parse.parseWords(dMuse.leftContext(word));
         for (int i = 0; i < returned.length; i++) {
             if (returned[i].equals(".")) {
-                //TODO chance for error because word is repeated back to back in list (dont draw back to back from returned)
                 if (i == returned.length - 1)
                     returned[i] = returned[i - 1];
                 else
@@ -124,10 +120,10 @@ public class Datamuse {
 
 
 
-    //randomizes index for array
-    public static int randomIndex(ArrayList<String> n){
-        return (int)(Math.random() * n.size()) + 1;
-    }
+//    //randomizes index for array
+//    public static int randomIndex(ArrayList<String> n){
+//        return (int)(Math.random() * n.size()) + 1;
+//    }
 
 
 
@@ -315,6 +311,114 @@ public class Datamuse {
         return  (int)(Math.random()*max+1);
     }
 
+    /**
+     * another print method that writes in rainbow
+     * @param chunk the thing they want to print
+     * @param printLn whether wants to be printed with println or just print
+     */
+
+    public static void rainbowWrite(String chunk, boolean printLn){
+        //ArrayList of the colors of the rainbow, length so that it can write full chunk
+        ArrayList<String> Colors = new ArrayList<String>();
+        //the chunk to be returned
+        String rainbowChunk = "";
+        //int to ensure that even with a blank space the color won't be skipped
+        int offset = 0;
+        //adding colors of the rainbow to Colors
+        for(int i = 0; i < (chunk.length()/6 + 6); i++){
+            Colors.add(ANSI_RED);
+            Colors.add(ANSI_YELLOW);
+            Colors.add(YELLOW_BRIGHT);
+            Colors.add(ANSI_GREEN);
+            Colors.add(ANSI_BLUE);
+            Colors.add(ANSI_PURPLE);
+        }
+        for(int i = 0; i < chunk.length(); i++){
+            //do not do anything if it is just a blank space baby
+            if(chunk.charAt(i) == ' ') {
+                rainbowChunk += chunk.charAt(i);
+                offset++;
+            }
+            else
+                rainbowChunk += (Colors.get(i-offset) + chunk.charAt(i) + ANSI_RESET);
+            //^adding color to just the substring of one char, so that chunk changes colors each letter
+        }
+        //boolean for println vs. print
+        if(printLn)
+            System.out.println(rainbowChunk);
+        else
+            System.out.print(rainbowChunk);
+    }
+
+    /**
+     * very similar to rainbowWrite but by changing the one **indicated** area we can implement different color patterns
+     * @param chunk what they want printed
+     * @param printLn whether they want it println or print
+     */
+    public static void christmasWrite(String chunk, boolean printLn){
+        //ArrayList of the colors of the rainbow, length so that it can write full chunk
+        ArrayList<String> Colors = new ArrayList<String>();
+        //the chunk to be returned
+        String christmasChunk = "";
+        //int to ensure that even with a blank space the color won't be skipped
+        int offset = 0;
+        //adding colors of the rainbow to Colors, change numbers to how often you will alternate between colors
+        for(int i = 0; i < (chunk.length()/2 + 2); i++){
+            Colors.add(ANSI_RED);
+            Colors.add(ANSI_GREEN);
+        }
+        for(int i = 0; i < chunk.length(); i++){
+            //do not do anything if it is just a blank space baby
+            if(chunk.charAt(i) == ' ') {
+                christmasChunk += chunk.charAt(i);
+                offset++;
+            }
+            else
+                christmasChunk += (Colors.get(i-offset) + chunk.charAt(i) + ANSI_RESET);
+            //^adding color to just the substring of one char, so that chunk changes colors each letter
+        }
+        //boolean for println vs. print
+        if(printLn)
+            System.out.println(christmasChunk);
+        else
+            System.out.print(christmasChunk);
+    }
+
+    /**
+     * very similar to rainbowWrite but by changing the one **indicated** area we can implement different color patterns
+     * @param chunk what they want printed
+     * @param printLn whether they want it println or print
+     */
+    public static void patrioticWrite(String chunk, boolean printLn){
+        //ArrayList of the colors of the rainbow, length so that it can write full chunk
+        ArrayList<String> Colors = new ArrayList<String>();
+        //the chunk to be returned
+        String patrioticChunk = "";
+        //int to ensure that even with a blank space the color won't be skipped
+        int offset = 0;
+        //adding colors of the rainbow to Colors, change numbers to how often you will alternate between colors
+        for(int i = 0; i < (chunk.length()/2 + 2); i++){
+            Colors.add(ANSI_RED);
+            Colors.add(ANSI_WHITE);
+            Colors.add(ANSI_BLUE);
+        }
+        for(int i = 0; i < chunk.length(); i++){
+            //do not do anything if it is just a blank space baby
+            if(chunk.charAt(i) == ' ') {
+                patrioticChunk += chunk.charAt(i);
+                offset++;
+            }
+            else
+                patrioticChunk += (Colors.get(i-offset) + chunk.charAt(i) + ANSI_RESET);
+            //^adding color to just the substring of one char, so that chunk changes colors each letter
+        }
+        //boolean for println vs. print
+        if(printLn)
+            System.out.println(patrioticChunk);
+        else
+            System.out.print(patrioticChunk);
+    }
+
     private DatamuseObject[] parseJson(String url) {
         String json = null;
 		try {
@@ -326,4 +430,8 @@ public class Datamuse {
         DatamuseObject[] page = gson.fromJson(json, DatamuseObject[].class);
         return page;
     }
+
+
+
+
 }

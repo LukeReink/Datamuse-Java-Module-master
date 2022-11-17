@@ -38,16 +38,82 @@ public class JSONParse {
      * @param in JSON data returned from the DatamuseQuery class.
      * @return An array of the words.
      */
-    public String[] parseWords(String in) {
-        JsonParserFactory factory = JsonParserFactory.getInstance();
-        JSONParser parser = factory.newJsonParser();
-        Map jsonData = parser.parseJson(in);
-        List al = (List) jsonData.get("root");
-        String[] results = new String[al.size()];
-        for (int i = 0; i < al.size(); i++) {
-            results[i] = (String) ((Map) al.get(i)).get("word");
+    public String [] parseWords(String in) {
+        if (in.equals("[]")) {
+            //if string returned is empty, return spanish so that errors aren't thrown
+            String[] invalid = {"inválido"};
+            return invalid;
+        } else {
+            JsonParserFactory factory = JsonParserFactory.getInstance();
+            JSONParser parser = factory.newJsonParser();
+            Map jsonData = parser.parseJson(in);
+            List al = (List) jsonData.get("root");
+            String[] results = new String[al.size()];
+            for (int i = 0; i < al.size(); i++) {
+                results[i] = (String) ((Map) al.get(i)).get("word");
+            }
+            return results;
         }
-        return results;
+    }
+
+
+
+    /**
+     * Overloaded method for parsewords which removes any conjunction words we can think of... this one returns an arraylist instead of a normal list
+     * @param in
+     * @param f
+     * @return
+     */
+    public ArrayList<String> parseWords(String in, boolean f) {
+        ArrayList<String> conjunctionVerbs = new ArrayList<>();
+        conjunctionVerbs.add(".");
+        conjunctionVerbs.add("and");
+        conjunctionVerbs.add("is");
+        conjunctionVerbs.add("with");
+        conjunctionVerbs.add("in");
+        conjunctionVerbs.add("for");
+        conjunctionVerbs.add("would");
+        conjunctionVerbs.add("of");
+        conjunctionVerbs.add("to");
+        conjunctionVerbs.add("for");
+        conjunctionVerbs.add("would");
+        conjunctionVerbs.add("of");
+        conjunctionVerbs.add("to");
+        conjunctionVerbs.add("was");
+        conjunctionVerbs.add("did");
+        conjunctionVerbs.add("were");
+        conjunctionVerbs.add("or");
+        conjunctionVerbs.add(".");
+        conjunctionVerbs.add("the");
+        conjunctionVerbs.add("a");
+        conjunctionVerbs.add("that");
+        conjunctionVerbs.add("all");
+        if (in.equals("[]")) {
+            //if string returned is empty, return spanish so that errors aren't thrown
+            ArrayList<String> invalid = new ArrayList<String>();
+            invalid.add("inválido");
+            return invalid;
+        } else {
+            JsonParserFactory factory = JsonParserFactory.getInstance();
+            JSONParser parser = factory.newJsonParser();
+            Map jsonData = parser.parseJson(in);
+            List al = (List) jsonData.get("root");
+            ArrayList<String> results = new ArrayList<>();
+            for (int i = 0; i < al.size(); i++) {
+                results.add((String) ((Map) al.get(i)).get("word"));
+            }
+            for (int i = 0; i < results.size(); i++) {
+                for (int j = 0; j < conjunctionVerbs.size(); j++) {
+                    if (results.get(i).equals(conjunctionVerbs.get(j))) {
+                        results.remove(i);
+                        if (i != 0)
+                            i--;
+//                        System.out.println(returned);
+                    }
+                }
+            }
+            return results;
+        }
     }
 
     /**
@@ -68,16 +134,55 @@ public class JSONParse {
         return results;
     }
 
-    public int[] parseSyllables(String in) {
-        JsonParserFactory factory = JsonParserFactory.getInstance();
-        JSONParser parser = factory.newJsonParser();
-        Map jsonData = parser.parseJson(in);
-        List al = (List) jsonData.get("root");
-        int[] results = new int[al.size()];
-        for (int i = 0; i < al.size(); i++) {
-            results[i] = Integer.parseInt((String) ((Map) al.get(i)).get("numSyllables"));
-        }
-        return results;
+    public ArrayList<String> parseSyllables(String in, int n){
+            JsonParserFactory factory = JsonParserFactory.getInstance();
+            ArrayList<String> conjunctionVerbs = new ArrayList<>();
+            conjunctionVerbs.add("and");
+            conjunctionVerbs.add("is");
+            conjunctionVerbs.add("with");
+            conjunctionVerbs.add("in");
+            conjunctionVerbs.add("for");
+            conjunctionVerbs.add("would");
+            conjunctionVerbs.add("of");
+            conjunctionVerbs.add("to");
+            conjunctionVerbs.add("for");
+            conjunctionVerbs.add("would");
+            conjunctionVerbs.add("of");
+            conjunctionVerbs.add("to");
+            conjunctionVerbs.add("was");
+            conjunctionVerbs.add("did");
+            conjunctionVerbs.add("were");
+            conjunctionVerbs.add("or");
+            int index = 0;
+            String[] wordList = parseWords(in);
+            ArrayList<String> resulted = new ArrayList<String>();
+            JSONParser parser = factory.newJsonParser();
+            //checks if the returned is null for try catch errors
+            if(in.equals("[]"))
+                resulted.add("inválido");
+            else {
+
+                Map jsonData = parser.parseJson(in);
+                List al = (List) jsonData.get("root");
+                for (int i = 0; i < al.size(); i++) {
+                    if (Integer.parseInt((String) ((Map) al.get(i)).get("numSyllables")) == n)
+                        resulted.add(wordList[index]);
+                    index++;
+                }
+                for (int i = 0; i < resulted.size(); i++) {
+                    for (int j = 0; j < conjunctionVerbs.size(); j++) {
+                        if (resulted.get(i).equals(conjunctionVerbs.get(j))) {
+                            resulted.remove(i);
+                            if (i != 0)
+                                i--;
+//                        System.out.println(returned);
+                        }
+                    }
+                }
+                if(resulted.size() == 0)
+                    resulted.add("inválido");
+            }
+                return resulted;
     }
 
     /**
@@ -154,7 +259,7 @@ public class JSONParse {
 //                 Debugging: System.out.println("Word in question: " + word.substring(begin,end));
 
 
-                        if (word.substring(begin, end).equals(posIndicated)) {
+                        if (word.substring(begin, end).equals(posIndicated) && indexOfWord < wordList.length) {
 //                 Debugging: System.out.println("The word: " + wordList[indexOfWord-1]);
 //                            System.out.println("The index: " + (indexOfWord-1));
 //                            System.out.println("The chunk: " + in);
@@ -179,13 +284,12 @@ public class JSONParse {
                         returned.remove(i);
                         if(i != 0)
                             i--;
-//                        System.out.println(returned);
                     }
                 }
             }
         }
 
-            return returned;
+        return returned;
     }
         private int getStartIndex (String chunk){
             int index = 0;
