@@ -100,7 +100,6 @@ public class DataMuseQueryWithParser {
     }
 
 
-
     /**
      * Returns a list of similar words to the word/phrase supplied beginning with the specified letter(s).
      *
@@ -153,6 +152,18 @@ public class DataMuseQueryWithParser {
     public String wordsStartingWithEndingWith(String startLetter, String endLetter) {
         return getJSON("http://api.datamuse.com/words?sp=" + startLetter + "*" + endLetter);
     }
+
+
+
+
+    public String wordsStartingWith(String startLetter) {
+        return getJSON("http://api.datamuse.com/words?sp=" + startLetter + "*&md=p");
+    }
+
+
+
+
+
 
     /**
      * Find words which sound the same as the specified word/phrase when spoken.
@@ -213,5 +224,98 @@ public class DataMuseQueryWithParser {
             e.printStackTrace();
         }
         return s != null ? s.toString() : null;
+    }
+
+
+    /**
+     * * @param word the word inputted
+     * @return number of syllables of the word
+     */
+    public int hemidevisemiquaver(String word) {
+        String n = getJSON("https://api.datamuse.com/words?sp=" + word + "&qe=sp&md=s&max=1");
+        int o = 0;
+        for (int i = 0; i < n.length(); i++) {
+            if (n.substring(i,i+12).equals("numSyllables")) {
+                //TODO: only works for words 9 syllables and under
+                o = Integer.parseInt(n.substring(i+14, i+15));
+                i = n.length();
+            }
+        }
+        if (n.equals("[]")) {
+            /**
+             * COPIED from Google - Syllable Counter for When the Word is not in the DataMuse Database (https://stackoverflow.com/questions/9154027/java-writing-a-syllable-counter-based-on-specifications)
+             */
+            int count = 0;
+            word = word.toLowerCase();
+            for (int i = 0; i < word.length(); i++) {
+                if (word.charAt(i) == '\"' || word.charAt(i) == '\'' || word.charAt(i) == '-' || word.charAt(i) == ',' || word.charAt(i) == ')' || word.charAt(i) == '(') {
+                    word = word.substring(0,i)+word.substring(i+1, word.length());
+                }
+            }
+            boolean isPrevVowel = false;
+            for (int j = 0; j < word.length(); j++) {
+                if (word.contains("a") || word.contains("e") || word.contains("i") || word.contains("o") || word.contains("u")) {
+                    if (isVowel(word.charAt(j)) && !((word.charAt(j) == 'e') && (j == word.length()-1))) {
+                        if (!isPrevVowel) {
+                            count++;
+                            isPrevVowel = true;
+                        }
+                    } else {
+                        isPrevVowel = false;
+                    }
+                } else {
+                    count++;
+                    break;
+                }
+            }
+            return count;
+        }
+
+        return o;
+    }
+
+    /** COPIED from Google - Syllable Counter for When the Word is not in the DataMuse Database (https://stackoverflow.com/questions/9154027/java-writing-a-syllable-counter-based-on-specifications)
+     **/
+     public boolean isVowel(char c) {
+         return c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u';
+     }
+
+
+
+            /**
+             * get parts of speech for a word
+             * @param word the word
+             * @return ArrayList of possile parts of speech of the word inputted
+             */
+
+
+    public ArrayList<String> getPartsofSpeech(String word) {
+        String n = getJSON("https://api.datamuse.com/words?sp=" + word + "&qe=&md=p&max=1");
+        int begin = 0;
+        int end = 0;
+        ArrayList<String> listofWords = new ArrayList<String>();
+        boolean reachedQuote = false;
+        boolean stillGoing = true;
+        for (int i = 1; i < n.length(); i++) {
+            if (n.charAt(i) == '[') {
+                begin = i + 2;
+                while(stillGoing) {
+                    end = begin + 1;
+                    while (!reachedQuote) {
+                        //gives us where a quotation is (indicates end of a word)
+                        if (n.charAt(end) == '"')
+                            reachedQuote = true;
+                        else
+                            end++;
+                    }
+                    reachedQuote = false;
+                    listofWords.add(n.substring(begin, end));
+                    begin = end + 3;
+                    if (n.charAt(end + 2) != '"')
+                        stillGoing = false;
+                }
+            }
+        }
+        return listofWords;
     }
 }

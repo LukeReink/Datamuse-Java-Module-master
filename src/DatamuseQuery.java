@@ -47,6 +47,10 @@ public class DatamuseQuery {
         return getJSON("http://api.datamuse.com/words?rel_syn=" + word);
     }
 
+
+
+
+
     /**
      * finds word with the same consonant in same positions as parameter
      * @param word word
