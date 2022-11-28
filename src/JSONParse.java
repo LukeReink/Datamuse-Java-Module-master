@@ -33,17 +33,28 @@ public class JSONParse {
     }
 
     /**
-     * A JSON parser for the words returned in the data.
+     * A JSON parser for the words returned in the data. Taken from open source.
      *
      * @param in JSON data returned from the DatamuseQuery class.
      * @return An array of the words.
      */
     public String [] parseWords(String in) {
-        if (in.equals("[]")) {
+        //"conjunctionVerbs" is really just any words we would like never returned in our program
+        ArrayList<String> conjunctionVerbs = new ArrayList<>();
+        conjunctionVerbs.add(".");
+        //because of rhetorical device generator we do not want this
+        conjunctionVerbs.add("like");
+        try {
             //if string returned is empty, return spanish so that errors aren't thrown
-            String[] invalid = {"inválido"};
-            return invalid;
-        } else {
+            if (in.equals("[]")) {
+                String[] invalid = {"inválido"};
+                return invalid;
+            }
+        }
+        catch(Exception e) {
+                String[] invalid = {"inválido"};
+                return invalid;
+            }
             JsonParserFactory factory = JsonParserFactory.getInstance();
             JSONParser parser = factory.newJsonParser();
             Map jsonData = parser.parseJson(in);
@@ -52,8 +63,30 @@ public class JSONParse {
             for (int i = 0; i < al.size(); i++) {
                 results[i] = (String) ((Map) al.get(i)).get("word");
             }
-            return results;
+            //remove conjunction verbs by setting values at indexes with original conjunction verbs to a list then not adding them to the final returned list
+        //count how many conjunction verbs there are
+        int count = 0;
+        for (int i = 0; i < results.length; i++) {
+            for (int j = 0; j < conjunctionVerbs.size(); j++) {
+                if (results[i].equals(conjunctionVerbs.get(j))) {
+                    results[i] = "nah";
+                    count++;
+                }
+            }
         }
+        //use new index to count where we are adding the new words onto the returned list
+        int index = 0;
+        //new list length of OG list minus number of conjunction verbs so that you can add all other words to the
+        String [] returned = new String[results.length-count];
+        for(int i = 0; i < results.length; i++){
+            if(!(results[i].equals("nah"))){
+                returned[index] = results[i];
+                index++;
+
+            }
+
+        }
+            return results;
     }
 
 
@@ -88,6 +121,7 @@ public class JSONParse {
         conjunctionVerbs.add("a");
         conjunctionVerbs.add("that");
         conjunctionVerbs.add("all");
+        conjunctionVerbs.add("like");
         if (in.equals("[]")) {
             //if string returned is empty, return spanish so that errors aren't thrown
             ArrayList<String> invalid = new ArrayList<String>();
@@ -133,6 +167,13 @@ public class JSONParse {
         }
         return results;
     }
+
+    /**
+     * Returns an array list of all of the words that are a part of the returned Json file that match the syllable count indicated (n)
+     * @param in
+     * @param n number of sylabbles want returned
+     * @return
+     */
 
     public ArrayList<String> parseSyllables(String in, int n){
             JsonParserFactory factory = JsonParserFactory.getInstance();
@@ -185,7 +226,7 @@ public class JSONParse {
                 return resulted;
     }
 
-    /**
+    /** Returns an array list of all of the words that are a part of the returned Json file that match the part of speech indicated (posIndicated)
      * @param in           huge json string
      * @param chooseToRemoveConjunctionWords if == 1 then it will remove conjunction words in the returned lists if == 0, otherwise
      * @param posIndicated indicated part of speech
@@ -230,7 +271,7 @@ public class JSONParse {
 
 
 
-
+        //if the json string has reached "tags" (the thing that always preceedes part of speech), parse the parts of speech using substring and quotation recognition
         for (int i = 0; i < in.length() - 6; i++) {
             if (in.substring(i, i + 4).equals("tags")) {
                 beginIndex = i + 6;
@@ -276,7 +317,7 @@ public class JSONParse {
         }
 
 
-
+        //removes all conjunction words from the returned list
         if (chooseToRemoveConjunctionWords && returned.size() > 0) {
             for (int i = 0; i < returned.size(); i++){
                 for (int j = 0; j < conjunctionVerbs.size(); j++){
@@ -288,7 +329,13 @@ public class JSONParse {
                 }
             }
         }
-
+        //if returned is null add our invalido key word to the returned list
+        if(returned.size() == 0) {
+            returned.add("inválido");
+        }
+        if(returned.get(0).equals("[]")) {
+            returned.add("inválido");
+        }
         return returned;
     }
         private int getStartIndex (String chunk){
