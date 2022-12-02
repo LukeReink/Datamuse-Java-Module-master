@@ -5,9 +5,6 @@ import java.util.Scanner;
 
 public class Datamuse {
 
-    //TODO: validate that robot sentence input is not just a empty space bar
-
-
     //object that has various methods which 'parse' (extract) just the words from an API call
     //different methods have different parameters that can specify what kinds of words the system wants returned (syllable counts, pos indications, etc).
     static JSONParse parser = new JSONParse();
@@ -43,19 +40,6 @@ public class Datamuse {
         Scanner s = new Scanner(System.in);
         boolean customerSatisfied = false;
 
-        while (!customerSatisfied) {
-            rhetoricalDeviceGenerator();
-            //validate that the customer is satisfied
-            System.out.println("Satisfied? Type anything. If you are not satisfied with these results type: " + YELLOW_BRIGHT + "'1'" + ANSI_RESET + " to try again...");
-            try {
-                //if they do not enter 1, move on, else stay in loop
-                if (!(s.nextInt() == 1))
-                    customerSatisfied = true;
-            } catch (Exception e) {
-                customerSatisfied = true;
-            }
-        }
-        customerSatisfied = false;
 
         //format the system output so it is user friendly
         //call all 'activities' or uses of the API that we thought of and implemented as methods
@@ -68,7 +52,7 @@ public class Datamuse {
         s.nextLine();
         alliterationAlternator();
         System.out.println();
-        System.out.println(ANSI_BLACK+  "Next: Wicked Wordl! Ready? (you know what to do)" + ANSI_RESET);
+        System.out.println("Next: Wicked Wordl! Ready? (you know what to do)");
         s.nextLine();
         wordl();
         System.out.println();
@@ -76,10 +60,8 @@ public class Datamuse {
         s.nextLine();
         robotSentence();
         System.out.println();
-        System.out.println("Next: Alliteration Sentence. This one might take a while... (ent)");
-        alliterationSentence();
         System.out.println();
-        rainbowWrite("Finally: Rhetorical Device Gen a ratar!!! (press e to the r)", true);
+        rainbowWrite("Next: Rhetorical Device Gen a ratar!!! (press e to the r)", true);
         while (!customerSatisfied) {
             rhetoricalDeviceGenerator();
             //validate that the customer is satisfied
@@ -93,8 +75,10 @@ public class Datamuse {
             }
         }
         System.out.println();
+        System.out.println("Finally: Alliteration Sentence. This one might take a while... (ent)");
+        alliterationSentence();
+        System.out.println();
         System.out.println("WOW! That was a movie!");
-
         rainbowWrite("Cya!", true);
     }
 
@@ -155,7 +139,7 @@ public class Datamuse {
      * and either returns a word that fits the parameters or prints out the null statement, asking our user to input their own word that the API could not generate
      *
      * @param numSylabbles the number of syllables they want the new word to be
-     * @param noun         their input
+     * @param noun their input
      * @param q boolean that indicates whether the system is asking for a verb associated with input 'noun' or an adjective that would modify 'noun'
      * @return
      */
@@ -178,10 +162,24 @@ public class Datamuse {
 
         //checks if the parameter gave an empty set
         while (b) {
+            //if the output is invalid for a word print the situation and ask for a replacement of what was trying to be output by the API
+            //ex: API returns null for 2 syllable adj that modify "house." System prints:
+            // "Null returned. Please enter a 2 sylabble adj that modifies house." Method returns s.nextline.
+            //if the API returns a valid word for the parameters Method returns that input
             if (input.equals("inválido")) {
-                System.out.println("Our system does not have any " + needed + "s that would often " + wording + " " + noun + "! Enter another " + numSylabbles + " syllable " + needed + " that would often " + wording + " " + noun + ":");
-                input = s.nextLine();
-                while (data.hemidevisemiquaver(input) != numSylabbles || !(checkIfPartofSpeech(data.getPartsofSpeech(input), neededinShorterTerms))) {
+                //validation that their new input will not throw an error
+                boolean validInput = false;
+                while(!validInput) {
+                    try {
+                        System.out.println("Our system does not have any " + needed + "s that would often " + wording + " " + noun + "! Enter another " + numSylabbles + " syllable " + needed + " that would often " + wording + " " + noun + ":");
+                        input = s.nextLine();
+                        validInput = true;
+                    } catch (Exception e) {
+                        System.out.println("Please enter a valid string.");
+                    }
+                }
+                //validating that their new input matches the parameters
+                while (input.equals(" ") || data.hemidevisemiquaver(input) != numSylabbles || !(checkIfPartofSpeech(data.getPartsofSpeech(input), neededinShorterTerms))) {
                     System.out.println("This is not a " + numSylabbles + " syllable " + needed + ". Give us a word that matches the parameters:");
                     input = s.nextLine();
                 }
@@ -263,8 +261,7 @@ public class Datamuse {
      */
 
     public static void wordl() throws JSONException {
-        //TODO: Remove synonyms that have the actual word in them for hints
-        //TODO: Remove the hint rhymes with if that word has already been used!
+        //TODO: Remove synonyms or rhymes that have the actual word in them for hints
         //list of words to guess
         DataMuseQueryWithParser dMuse = new DataMuseQueryWithParser();
         JSONParse parse = new JSONParse();
@@ -357,6 +354,12 @@ public class Datamuse {
         return guess.toLowerCase();
     }
 
+    /**
+     * Compares the users input syllable count to that of the word they are trying to guess and prints whether they are matches or not
+     * @param input input
+     * @param wordToGuess wordtoguess
+     */
+
 
     public static void wordlSyllableCheck(String input, String wordToGuess) {
         //checks if syllable count is equal for guess and word to guess
@@ -369,6 +372,12 @@ public class Datamuse {
         else
             System.out.print(input + "         ");
     }
+
+    /**
+     * * Compares the users input part of speech to that of the word they are trying to guess and prints whether they are matches or not
+     * @param input
+     * @param wordToGuess
+     */
 
     public static void wordlPoSCheck(String input, String wordToGuess) {
         //all possible part of speech of the word to guess
@@ -403,6 +412,12 @@ public class Datamuse {
         }
     }
 
+    /**
+     * prints whether the input sounds like the word to guess or not
+     * @param input
+     * @param wordToGuess
+     */
+
     public static void wordlSoundsLikeCheck(String input, String wordToGuess) {
         String[] SoundsLikeWordtoGuess = parser.parseWords(data.soundsSimilarforWordl(wordToGuess));
         boolean foundSoundsLike = false;
@@ -424,6 +439,12 @@ public class Datamuse {
         if (!foundSoundsLike)
             System.out.print(" || " + input + "      ");
     }
+
+    /**
+     * checks if input is a synonyms to word to guess
+     * @param input
+     * @param wordToGuess
+     */
 
     public static void wordlSynonymCheck(String input, String wordToGuess) {
         String[] SynonymstoWordtoGuess = parser.parseWords(data.SynonymsforWordl(wordToGuess));
@@ -447,7 +468,13 @@ public class Datamuse {
             System.out.print(" || " + input + "  ");
     }
 
+    /**
+     * checks if input is an antonym to word to guess
+     * @param input
+     * @param wordToGuess
+     */
     public static void wordlAntonymCheck(String input, String wordToGuess) {
+        //string list of all antonyms for the word to guess returned by the API
         String[] AntonymstoWordtoGuess = parser.parseWords(data.AntonymsforWordl(wordToGuess));
         boolean foundAntonym = false;
         int length = AntonymstoWordtoGuess.length;
@@ -468,6 +495,12 @@ public class Datamuse {
         if (!foundAntonym)
             System.out.print(" || " + input + " ");
     }
+
+    /**
+     * checks if the input is a rhyme to the word to guess
+     * @param input
+     * @param wordToGuess
+     */
 
     public static void wordlRhymesCheck(String input, String wordToGuess) {
         String[] RhymesWithWordtoGuess = parser.parseWords(data.rhymesWithforWordl(wordToGuess));
@@ -1010,8 +1043,7 @@ public class Datamuse {
         Scanner s = new Scanner(System.in);
         ArrayList<String> n = new ArrayList<>();
 
-        System.out.println("Enter a starting word.");
-        String startWord = s.nextLine();
+        String startWord = inputValidation(0);
         n.add(startWord);
 
         String finalWord;
